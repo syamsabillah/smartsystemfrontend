@@ -43,7 +43,7 @@ const MainSection = () => {
             <Route path="/signup" element={<Signup />} />
             <Route path="/inventory" element={<Inventory />} />
             <Route path="/lessons" element={<Lessons />} />
-            <Route path="/predict" element={<Predict />} />
+
             <Route path="*" element={<NoMatch />} />
           </Routes>
         </main>

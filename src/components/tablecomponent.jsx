@@ -106,7 +106,7 @@ const TableComponent = () => {
   return (
     <Box mt="20px">
       <Typography variant="h6" mb="10px">
-        Combined Data Table
+        Data Tabel
       </Typography>
       <TableContainer component={Paper}>
         <Table>

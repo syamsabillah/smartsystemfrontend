@@ -7,26 +7,12 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Typography,
-  Box,
   Button,
 } from "@mui/material";
 import axios from "axios";
 import { CSVLink } from "react-csv";
 
 // Format date
-const formatDate = (dateString) => {
-  const options = {
-    hour: "2-digit",
-    minute: "2-digit",
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    timeZone: "UTC",
-  };
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-GB", options).replace(",", "");
-};
 
 const Lessons = () => {
   // Fetch data
@@ -35,8 +21,10 @@ const Lessons = () => {
   useEffect(() => {
     const fetchTableData = async () => {
       try {
-        const response = await axios.get("http://localhost:5022/barangkeluar");
-        setTableData(response.data); // Assuming the response has a "temperature" field
+        const response = await axios.get(
+          "http://localhost:5022/barangkeluarweek"
+        );
+        setTableData(response.data);
       } catch (error) {
         console.error("Error fetching temperature data:", error);
       }
@@ -66,6 +54,19 @@ const Lessons = () => {
       </div>
 
       <div style={{ marginLeft: "15%" }}>
+        <CSVLink
+          data={tableData}
+          filename={"data_inventory.csv"}
+          style={{ textDecoration: "none" }}
+        >
+          <Button
+            variant="contained"
+            color="primary"
+            style={{ marginLeft: "10px" }}
+          >
+            Download CSV
+          </Button>
+        </CSVLink>
         {/* TABLE */}
         <TableContainer component={Paper}>
           <Table>
@@ -76,7 +77,7 @@ const Lessons = () => {
                 <TableCell>Lobak</TableCell>
                 <TableCell>Ayam</TableCell>
                 <TableCell>Saos</TableCell>
-                <TableCell>Waktu</TableCell>
+                <TableCell>Minggu</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -87,7 +88,7 @@ const Lessons = () => {
                   <TableCell>{row.lobak}</TableCell>
                   <TableCell>{row.ayam}</TableCell>
                   <TableCell>{row.saos}</TableCell>
-                  <TableCell>{formatDate(row.createdAt)}</TableCell>
+                  <TableCell>{row.minggu}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -15,12 +15,6 @@ const sidebarNavItems = [
     path: "/Inventory",
     icon: <HiInformationCircle className="sidebar-btn-icon" />,
   },
-
-  {
-    title: "Predict",
-    path: "/Predict",
-    icon: <HiCloud className="sidebar-btn-icon" />,
-  },
 ];
 
 const socialLinks = [
