@@ -20,7 +20,7 @@ import ProgressCircle from "../components/ProgressCircle";
 import TableComponent from "../components/tablecomponent";
 import axios from "axios";
 
-// Format date function
+// Format date function for Indonesia/Jakarta timezone
 const formatDate = (dateString) => {
   const options = {
     hour: "2-digit",
@@ -28,27 +28,28 @@ const formatDate = (dateString) => {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone: "Asia/Jakarta",
   };
   const date = new Date(dateString);
-  return date.toLocaleDateString("en-GB", options).replace(",", "");
+  return new Intl.DateTimeFormat("en-GB", options).format(date);
 };
 
 const Lessons = () => {
   // State for table data and modal visibility
   const [tableData, setTableData] = useState([]);
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState(null); // State to handle errors
 
   // Fetch table data
   useEffect(() => {
     const fetchTableData = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5022/barangprediksi"
+          "http://localhost:5022/barangprediksilatest"
         );
         setTableData(response.data);
       } catch (error) {
-        console.error("Error fetching temperature data:", error);
+        console.error("Error fetching data:", error);
       }
     };
 
@@ -58,16 +59,15 @@ const Lessons = () => {
     return () => clearInterval(interval); // Clean up interval on component unmount
   }, []);
 
-  //handle sending data
-  // InputField Define
+  console.log(tableData);
+  // Handle sending data
   const [formData, setFormData] = useState({
     kubis: "",
     lobak: "",
     ayam: "",
     saos: "",
+    createdAt: "", // Added createdAt field
   });
-
-  console.log(formData);
 
   const resetForm = () => {
     setFormData({
@@ -75,6 +75,7 @@ const Lessons = () => {
       lobak: "",
       ayam: "",
       saos: "",
+      createdAt: "", // Reset datetime field
     });
   };
 
@@ -86,19 +87,20 @@ const Lessons = () => {
     });
   };
 
-  const handleadd = async (e) => {
+  const handleadd = async () => {
     try {
-      // Sesuaikan endpoint
-      const response = await axios.post(url + "/barangprediksi", formData);
-
+      const response = await axios.post(
+        "http://localhost:5022/barangprediksi",
+        formData
+      );
       if (response.status === 201) {
         resetForm();
         handleClose();
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error("Error adding data:", error);
+    }
   };
-
-  //end sending data
 
   // Theme and colors
   const theme = useTheme();
@@ -189,30 +191,26 @@ const Lessons = () => {
             </div>
           </div>
           <TableContainer component={Paper}>
-            <Table>
+            <Table sx={{ tableLayout: "fixed", width: "100%" }}>
               <TableHead>
                 <TableRow>
-                  <TableCell>No</TableCell>
-                  <TableCell>Jenis</TableCell>
-                  <TableCell>Jumlah Prediksi</TableCell>
-                  <TableCell>Waktu</TableCell>
+                  <TableCell sx={{ width: "5%" }}>No</TableCell>
+                  <TableCell sx={{ width: "20%" }}>Kubis</TableCell>
+                  <TableCell sx={{ width: "20%" }}>Lobak</TableCell>
+                  <TableCell sx={{ width: "20%" }}>Ayam</TableCell>
+                  <TableCell sx={{ width: "20%" }}>Saos</TableCell>
+                  <TableCell sx={{ width: "15%" }}>Waktu</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {tableData.flatMap((row, rowIndex) =>
-                  Object.entries(row)
-                    .filter(([key]) => key !== "id" && key !== "createdAt")
-                    .map(([jenis, jumlahPrediksi], index) => (
-                      <TableRow key={`${row.id}-${jenis}`}>
-                        <TableCell>
-                          {rowIndex * Object.keys(row).length + index + 1}
-                        </TableCell>
-                        <TableCell>{jenis}</TableCell>
-                        <TableCell>{jumlahPrediksi}</TableCell>
-                        <TableCell>{formatDate(row.createdAt)}</TableCell>
-                      </TableRow>
-                    ))
-                )}
+                <TableRow>
+                  <TableCell>{1}</TableCell>
+                  <TableCell>{tableData.kubis}</TableCell>
+                  <TableCell>{tableData.lobak}</TableCell>
+                  <TableCell>{tableData.ayam}</TableCell>
+                  <TableCell>{tableData.saos}</TableCell>
+                  <TableCell>{formatDate(tableData.createdAt)}</TableCell>
+                </TableRow>
               </TableBody>
             </Table>
           </TableContainer>
@@ -228,7 +226,7 @@ const Lessons = () => {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: "45%",
-            height: "55%",
+            height: "70%",
             bgcolor: "background.paper",
             borderRadius: "4px",
             boxShadow: 24,
@@ -275,7 +273,16 @@ const Lessons = () => {
               value={formData.ayam}
               onChange={handleInputChange}
             />
-            <Box display="flex" justifyContent="flex-end" mt={2}>
+            <TextField
+              fullWidth
+              margin="normal"
+              variant="outlined"
+              type="datetime-local"
+              name="createdAt"
+              value={formData.createdAt}
+              onChange={handleInputChange}
+            />
+            <Box sx={{ mt: "auto", textAlign: "right" }}>
               <Button
                 variant="contained"
                 color="secondary"

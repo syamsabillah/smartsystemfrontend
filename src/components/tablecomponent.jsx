@@ -23,10 +23,10 @@ const formatDate = (dateString) => {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
-    timeZone: "UTC",
+    timeZone: "Asia/Jakarta",
   };
   const date = new Date(dateString);
-  return date.toLocaleDateString("en-GB", options).replace(",", "");
+  return new Intl.DateTimeFormat("en-GB", options).format(date);
 };
 
 // Combine and aggregate data
