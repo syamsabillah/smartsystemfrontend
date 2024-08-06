@@ -209,7 +209,11 @@ const Lessons = () => {
                   <TableCell>{tableData.lobak}</TableCell>
                   <TableCell>{tableData.ayam}</TableCell>
                   <TableCell>{tableData.saos}</TableCell>
-                  <TableCell>{formatDate(tableData.createdAt)}</TableCell>
+                  <TableCell>
+                    {tableData?.createdAt
+                      ? formatDate(tableData.createdAt)
+                      : ""}
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
