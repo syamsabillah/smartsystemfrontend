@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
-import Auth from "../utils/auth";
 import {
   Table,
   TableBody,
@@ -12,15 +10,17 @@ import {
   Box,
   Typography,
   useTheme,
+  Button,
+  Modal,
+  TextField,
 } from "@mui/material";
 import { tokens } from "../theme";
-
 import LineChart from "../components/LineChart";
 import ProgressCircle from "../components/ProgressCircle";
 import TableComponent from "../components/tablecomponent";
 import axios from "axios";
 
-//fotmat date
+// Format date function
 const formatDate = (dateString) => {
   const options = {
     hour: "2-digit",
@@ -35,35 +35,81 @@ const formatDate = (dateString) => {
 };
 
 const Lessons = () => {
-  // If the user is not logged in, redirect to the login page
-
-  //fetch data
+  // State for table data and modal visibility
   const [tableData, setTableData] = useState([]);
+  const [open, setOpen] = useState(false);
 
+  // Fetch table data
   useEffect(() => {
     const fetchTableData = async () => {
       try {
         const response = await axios.get(
           "http://localhost:5022/barangprediksi"
         );
-
-        setTableData(response.data); // Assuming the response has a "temperature" field
+        setTableData(response.data);
       } catch (error) {
         console.error("Error fetching temperature data:", error);
       }
     };
 
     fetchTableData(); // Initial fetch
-
     const interval = setInterval(fetchTableData, 5000); // Fetch every 5 seconds
 
     return () => clearInterval(interval); // Clean up interval on component unmount
   }, []);
 
-  //end fetch
+  //handle sending data
+  // InputField Define
+  const [formData, setFormData] = useState({
+    kubis: "",
+    lobak: "",
+    ayam: "",
+    saos: "",
+  });
 
+  console.log(formData);
+
+  const resetForm = () => {
+    setFormData({
+      kubis: "",
+      lobak: "",
+      ayam: "",
+      saos: "",
+    });
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleadd = async (e) => {
+    try {
+      // Sesuaikan endpoint
+      const response = await axios.post(url + "/barangprediksi", formData);
+
+      if (response.status === 201) {
+        resetForm();
+        handleClose();
+      }
+    } catch (error) {}
+  };
+
+  //end sending data
+
+  // Theme and colors
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+  // Modal open/close handlers
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    setOpen(false);
+    resetForm();
+  };
 
   return (
     <section id="lessons" className="w-full min-h-screen p-4 md:p-8 ">
@@ -120,10 +166,27 @@ const Lessons = () => {
         <TableComponent />
         <br /> <br />
         <div>
-          <div>
-            <Typography variant="h5" sx={{ mb: "15px" }}>
-              Prediksi
-            </Typography>
+          <div className="flex">
+            <div style={{ marginRight: "10%" }}>
+              <Typography variant="h5" sx={{ mb: "15px" }}>
+                Prediksi
+              </Typography>
+            </div>
+            <div className="ml-auto">
+              <Button
+                variant="contained"
+                sx={{
+                  borderRadius: "2px",
+                  backgroundColor: colors.blueAccent[600],
+                  "&:hover": {
+                    backgroundColor: colors.blueAccent[800],
+                  },
+                }}
+                onClick={handleOpen}
+              >
+                Add data
+              </Button>
+            </div>
           </div>
           <TableContainer component={Paper}>
             <Table>
@@ -156,7 +219,78 @@ const Lessons = () => {
         </div>
       </Box>
 
-      {/* Lessons */}
+      {/* Modal */}
+      <Modal open={open} onClose={handleClose}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "45%",
+            height: "55%",
+            bgcolor: "background.paper",
+            borderRadius: "4px",
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <Typography variant="h6" component="h2">
+            Add New Data Prediksi
+          </Typography>
+          <Box component="form" sx={{ mt: 2 }}>
+            <TextField
+              fullWidth
+              label="Kubis"
+              margin="normal"
+              variant="outlined"
+              name="kubis"
+              value={formData.kubis}
+              onChange={handleInputChange}
+            />
+            <TextField
+              fullWidth
+              label="Lobak"
+              margin="normal"
+              variant="outlined"
+              name="lobak"
+              value={formData.lobak}
+              onChange={handleInputChange}
+            />
+            <TextField
+              fullWidth
+              label="Saos"
+              margin="normal"
+              variant="outlined"
+              name="saos"
+              value={formData.saos}
+              onChange={handleInputChange}
+            />
+            <TextField
+              fullWidth
+              label="Ayam"
+              margin="normal"
+              variant="outlined"
+              name="ayam"
+              value={formData.ayam}
+              onChange={handleInputChange}
+            />
+            <Box display="flex" justifyContent="flex-end" mt={2}>
+              <Button
+                variant="contained"
+                color="secondary"
+                sx={{ mr: 2 }}
+                onClick={handleadd}
+              >
+                Add
+              </Button>
+              <Button onClick={handleClose} variant="contained" color="primary">
+                Close
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Modal>
     </section>
   );
 };
